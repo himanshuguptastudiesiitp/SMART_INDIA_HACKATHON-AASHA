@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Report</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+
+            
+
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+    
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+    
+            <div class="all-menu-divider"></div>
+    
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <div class="alert-panel-header">
+            <span><i class="fa-solid fa-bell"></i> Recent Alerts</span>
+            <label for="alert-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Active Landslide – NH-37</div>
+            <div class="alert-meta">Assam · 12 min ago</div>
+            <span class="alert-level level-high">HIGH</span>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Slope Movement Detected</div>
+            <div class="alert-meta">Meghalaya · 45 min ago</div>
+            <span class="alert-level level-high">HIGH</span>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Heavy Rainfall Warning</div>
+            <div class="alert-meta">Arunachal Pradesh · 1 hr ago</div>
+            <span class="alert-level level-medium">MEDIUM</span>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Road Blocked – Shillong Bypass</div>
+            <div class="alert-meta">Meghalaya · 2 hrs ago</div>
+            <span class="alert-level level-medium">MEDIUM</span>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Ground Crack Reported</div>
+            <div class="alert-meta">Manipur · 3 hrs ago</div>
+            <span class="alert-level level-low">LOW</span>
+        </div>
+
+        <div class="alert-item">
+            <div class="alert-title">Minor Debris Fall</div>
+            <div class="alert-meta">Nagaland · 5 hrs ago</div>
+            <span class="alert-level level-low">LOW</span>
+        </div>
+    </div>
+
+    <div class="input-page-wrapper">
+        <h1><i class="fa-solid fa-camera"></i> Upload Report & Review</h1>
+        <p class="subtitle">Upload photos of cracks, blocked roads or slope movement and share your problem + review.
+        </p>
+
+        <div class="info-note">
+            <strong>Note:</strong> This is a only a prototype for SIH .
+        </div>
+
+        <form>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="reporter">Your Name</label>
+                    <input type="text" id="reporter" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="role">You are</label>
+                    <select id="role">
+                        <option value="">Select</option>
+                        <option>Citizen</option>
+                        <option>Field Officer</option>
+                        <option>District Administration</option>
+                        <option>Disaster Management Team</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="district">State / District</label>
+                    <select id="district">
+                        <option value="">Select</option>
+                        <option>Assam</option>
+                        <option>Meghalaya</option>
+                        <option>Manipur</option>
+                        <option>Nagaland</option>
+                        <option>Tripura</option>
+                        <option>Arunachal Pradesh</option>
+                        <option>Mizoram</option>
+                        <option>Sikkim</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="issue">Problem Type</label>
+                    <select id="issue">
+                        <option value="">Select problem</option>
+                        <option>Ground Cracks / Fissures</option>
+                        <option>Slope Movement</option>
+                        <option>Blocked Road</option>
+                        <option>Active Landslide</option>
+                        <option>Flash Flood / Waterlogging</option>
+                        <option>Damaged Infrastructure</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Exact Location</label>
+                <input type="text" id="location" placeholder="Village / Road name / Landmark">
+            </div>
+
+            <div class="form-group">
+                <label for="problem">Describe the Problem</label>
+                <textarea id="problem" placeholder="Write what you observed..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="media">Upload Photos / Videos</label>
+                <input type="file" id="media" accept="image/*,video/*" multiple>
+            </div>
+
+            <div class="form-group">
+                <label for="rating">Your Rating</label>
+                <select id="rating">
+                    <option value="">Select rating</option>
+                    <option>★★★★★ Excellent response needed</option>
+                    <option>★★★★☆ High priority</option>
+                    <option>★★★☆☆ Moderate issue</option>
+                    <option>★★☆☆☆ Low priority</option>
+                    <option>★☆☆☆☆ Minor observation</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="review">Additional Review / Feedback</label>
+                <textarea id="review" placeholder="Any extra feedback..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Report & Review</button>
+        </form>
+
+        <a href="Dashboard.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer class="footer">
+        <p>
+            AASHA- A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+
+<script>
+    const API_BASE_URL = "http://127.0.0.1:8000";
+
+    const reportForm = document.querySelector("form");
+
+    reportForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const name = document.getElementById("reporter").value.trim();
+    const role = document.getElementById("role").value;
+    const state = document.getElementById("district").value;
+    const problemType = document.getElementById("issue").value;
+    const location = document.getElementById("location").value.trim();
+    const description = document.getElementById("problem").value.trim();
+    const rating = document.getElementById("rating").value;
+    const feedback = document.getElementById("review").value.trim();
+
+    if (!name || !role || !state || !problemType || !location || !description) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    try {
+        // Create FormData
+        const formData = new FormData();
+
+        formData.append("name", name);
+        formData.append("role", role);
+        formData.append("state", state);
+        formData.append("problem_type", problemType);
+        formData.append("location", location);
+        formData.append("description", description);
+
+        if (rating) {
+            formData.append("rating", rating);
+        }
+
+        if (feedback) {
+            formData.append("feedback", feedback);
+        }
+
+        // Add selected image/video files
+        const mediaFiles = document.getElementById("media").files;
+
+        for (const file of mediaFiles) {
+            formData.append("files", file);
+        }
+
+        const response = await fetch(
+            `${API_BASE_URL}/incident-reports`,
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.detail || "Failed to submit report");
+        }
+
+        alert(
+            `Report submitted successfully!\n\n` +
+            `Report ID: ${result.report_id}\n` +
+            `Status: ${result.status}\n` +
+            `Files uploaded: ${result.files.length}`
+        );
+
+        reportForm.reset();
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Unable to submit report. Please make sure the backend server is running.");
+    }
+});
+</script>
+</body>
+
+</html>

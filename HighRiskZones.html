@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Risk Zones</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+           
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+    
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+    
+            <div class="all-menu-divider"></div>
+    
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <div class="alert-panel-header">
+            <span><i class="fa-solid fa-bell"></i> Recent Alerts</span>
+            <label for="alert-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+        <div class="alert-item">
+            <div class="alert-title">Active Landslide – NH-37</div>
+            <div class="alert-meta">Assam · 12 min ago</div>
+            <span class="alert-level level-high">HIGH</span>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <h1><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</h1>
+        <p class="subtitle">Currently monitored high-risk landslide zones across North East Region.</p>
+
+        <div class="content-card">
+            <h2>Active High Risk Zones</h2>
+            <table class="data-table">
+        <thead>
+            <tr>
+                <th>Zone</th>
+                <th>State</th>
+                <th>Rainfall (mm)</th>
+                <th>Soil Moisture</th>
+                <th>Risk Level</th>
+                <th>Risk Score</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+
+        <tbody id="riskZonesTable">
+            <tr>
+                <td colspan="7">Loading risk zones...</td>
+            </tr>
+        </tbody>
+    </table>
+        </div>
+
+        <div class="content-card">
+            <h2>Risk Summary</h2>
+
+            <ul id="riskSummary">
+                <li>Loading risk summary...</li>
+            </ul>
+        </div>
+
+        <a href="Dashboard.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer class="footer">
+        <p>AASHA- A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+
+<script>
+
+const API_BASE_URL = "http://127.0.0.1:8000";
+
+async function loadRiskZones() {
+
+    const table = document.getElementById("riskZonesTable");
+    const summary = document.getElementById("riskSummary");
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/high-risk-zones`
+        );
+
+        if (!response.ok) {
+            throw new Error("High risk zones API failed");
+        }
+
+        const data = await response.json();
+
+        table.innerHTML = "";
+
+        let highCount = 0;
+        let moderateCount = 0;
+        let lowCount = 0;
+
+        data.zones.forEach(zone => {
+
+            if (zone.risk_level === "High") {
+                highCount++;
+            }
+            else if (zone.risk_level === "Moderate") {
+                moderateCount++;
+            }
+            else if (zone.risk_level === "Low") {
+                lowCount++;
+            }
+
+            let riskClass = "badge-green";
+
+            if (zone.risk_level === "High") {
+                riskClass = "badge-red";
+            }
+            else if (zone.risk_level === "Moderate") {
+                riskClass = "badge-orange";
+            }
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${zone.name}</td>
+                <td>${zone.state}</td>
+                <td>${zone.rainfall ?? "N/A"}</td>
+                <td>${zone.soil_moisture ?? "N/A"}</td>
+
+                <td>
+                    <span class="status-badge ${riskClass}">
+                        ${zone.risk_level.toUpperCase()}
+                    </span>
+                </td>
+
+                <td>${zone.risk_score} / 100</td>
+
+                <td>
+                    ${zone.latitude.toFixed(4)},
+                    ${zone.longitude.toFixed(4)}
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+
+
+        summary.innerHTML = `
+            <li><strong>${highCount}</strong> zones currently at HIGH risk</li>
+            <li><strong>${moderateCount}</strong> zones currently at MODERATE risk</li>
+            <li><strong>${lowCount}</strong> zones currently at LOW risk</li>
+            <li>Continuous monitoring active for all ${data.total_zones} listed zones</li>
+        `;
+
+    }
+    catch (error) {
+
+        console.error("Risk zones error:", error);
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    Unable to load risk zones.
+                </td>
+            </tr>
+        `;
+
+        summary.innerHTML = `
+            <li>Unable to load risk zone data.</li>
+        `;
+    }
+}
+
+loadRiskZones();
+
+</script>
+</body>
+
+</html>

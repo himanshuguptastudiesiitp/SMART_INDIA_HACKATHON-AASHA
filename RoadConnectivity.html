@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roads</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+           
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+    
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+    
+            <div class="all-menu-divider"></div>
+    
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <div class="alert-panel-header">
+            <span><i class="fa-solid fa-bell"></i> Recent Alerts</span>
+            <label for="alert-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+        <div class="alert-item">
+            <div class="alert-title">Road Blocked – Shillong Bypass</div>
+            <div class="alert-meta">Meghalaya · 2 hrs ago</div>
+            <span class="alert-level level-medium">MEDIUM</span>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <h1><i class="fa-solid fa-road"></i> Road Connectivity</h1>
+        <p class="subtitle">Current status of major roads affected by landslides or weather in NER.</p>
+
+        <div class="content-card">
+            <h2>Road Status</h2>
+            <table class="data-table">
+                <tr>
+                    <th>Road / Highway</th>
+                    <th>Section</th>
+                    <th>Status</th>
+                    <th>Last Update</th>
+                </tr>
+                <tr>
+                    <td>NH-37</td>
+                    <td>Jorhat – Dibrugarh</td>
+                    <td><span class="status-badge badge-red">Blocked</span></td>
+                    <td>01 Sep 2026</td>
+                </tr>
+                <tr>
+                    <td>Shillong Bypass</td>
+                    <td>East Khasi Hills</td>
+                    <td><span class="status-badge badge-orange">Restricted</span></td>
+                    <td>01 Sep 2026</td>
+                </tr>
+                <tr>
+                    <td>NH-2</td>
+                    <td>Imphal – Kohima</td>
+                    <td><span class="status-badge badge-green">Open</span></td>
+                    <td>31 Aug 2026</td>
+                </tr>
+                <tr>
+                    <td>NH-13</td>
+                    <td>Tawang Sector</td>
+                    <td><span class="status-badge badge-orange">Caution</span></td>
+                    <td>01 Sep 2026</td>
+                </tr>
+                <tr>
+                    <td>NH-8</td>
+                    <td>Agartala Corridor</td>
+                    <td><span class="status-badge badge-green">Open</span></td>
+                    <td>30 Aug 2026</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="content-card">
+            <h2>Notes</h2>
+            <ul>
+                <li>NH-37 remains fully blocked due to active landslide.</li>
+                <li>Shillong Bypass open only for light vehicles.</li>
+                <li>Updates are refreshed from field reports and sensors.</li>
+            </ul>
+        </div>
+
+        <a href="Dashboard.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer class="footer">
+        <p>AASHA- A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AASHA - A Ray Of Hope</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+            
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+    
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+    
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+    
+            <div class="all-menu-divider"></div>
+    
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <div class="alert-panel-header">
+            <span><i class="fa-solid fa-bell"></i> Recent Alerts</span>
+            <label for="alert-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+        <div class="alert-item">
+            <div class="alert-title">Active Landslide – NH-37</div>
+            <div class="alert-meta">Assam · 12 min ago</div>
+            <span class="alert-level level-high">HIGH</span>
+        </div>
+        <div class="alert-item">
+            <div class="alert-title">Slope Movement Detected</div>
+            <div class="alert-meta">Meghalaya · 45 min ago</div>
+            <span class="alert-level level-high">HIGH</span>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <h1><i class="fa-solid fa-user"></i> Account & Alerts</h1>
+        <p class="subtitle">View your account details and manage alert subscriptions.</p>
+
+        <div class="content-card">
+            <h2>Account Information</h2>
+            <p><strong>Name:</strong> Authority User</p>
+            <p><strong>Role:</strong> District Administration</p>
+            <p><strong>Email:</strong> authority@ner.gov.in</p>
+            <p><strong>Assigned Region:</strong> North East Region</p>
+        </div>
+
+        <div class="content-card">
+            <h2>Active Alert Subscriptions</h2>
+            <ul>
+                <li>High Risk Landslide Alerts – All NER States</li>
+                <li>Road Blockage Notifications – Assam & Meghalaya</li>
+                <li>Heavy Rainfall Warnings – Arunachal Pradesh</li>
+                <li>Daily Status Digest – Email</li>
+            </ul>
+        </div>
+
+        <div class="content-card">
+            <h2>Recent Alert History</h2>
+            <table class="data-table">
+                <tr>
+                    <th>Date</th>
+                    <th>Alert</th>
+                    <th>Level</th>
+                    <th>Status</th>
+                </tr>
+                <tr>
+                    <td>01 Sep 2026</td>
+                    <td>Active Landslide – NH-37</td>
+                    <td><span class="status-badge badge-red">HIGH</span></td>
+                    <td>Open</td>
+                </tr>
+                <tr>
+                    <td>01 Sep 2026</td>
+                    <td>Slope Movement – East Khasi</td>
+                    <td><span class="status-badge badge-red">HIGH</span></td>
+                    <td>Under Review</td>
+                </tr>
+                <tr>
+                    <td>31 Aug 2026</td>
+                    <td>Heavy Rainfall Warning</td>
+                    <td><span class="status-badge badge-orange">MEDIUM</span></td>
+                    <td>Resolved</td>
+                </tr>
+            </table>
+        </div>
+
+        <a href="Dashboard.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer class="footer">
+        <p>AASHA- A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+</body>
+
+</html>

@@ -30,3 +30,24 @@ class SoilMoisture(Base):
     timestamp=Column(DateTime)
     moisture=Column(Float)
     unit = Column(String)
+
+
+class IncidentReport(Base):
+    __tablename__ = "incident_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    name = Column(String)
+    role = Column(String)
+    state = Column(String)
+    problem_type = Column(String)
+    location = Column(String)
+    description = Column(String)
+
+    photo = Column(String, nullable=True)
+
+    rating = Column(String, nullable=True)
+    feedback = Column(String, nullable=True)
+
+    status = Column(String, default="Open")
+    created_at = Column(DateTime)

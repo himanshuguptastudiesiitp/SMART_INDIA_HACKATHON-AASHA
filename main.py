@@ -1,12 +1,32 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import requests
-from datetime import datetime , timedelta
+from datetime import datetime, timedelta
+import os
+import shutil
+import json
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from database import engine, Base, SessionLocal
 import models
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+os.makedirs("uploads", exist_ok=True)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -500,8 +520,14 @@ def rainfall_by_date(
     ]
 
     total_rainfall = sum(daily_rainfall)
-    max_rainfall = max(daily_rainfall)
-    average_rainfall = total_rainfall / len(daily_rainfall)
+
+    max_rainfall = max(daily_rainfall) if daily_rainfall else 0
+
+    average_rainfall = (
+        total_rainfall / len(daily_rainfall)
+        if daily_rainfall
+        else 0
+    )
 
     # Rainfall windows for requested date
 
@@ -539,15 +565,15 @@ def rainfall_by_date(
 
     )
 
+# Rainfall trend for requested date
 
-    # Rainfall trend
     first_half = sum(
-        value for value in rainfall_values[:12]
+        value for value in daily_rainfall[:12]
         if value is not None
     )
 
     second_half = sum(
-        value for value in rainfall_values[12:]
+        value for value in daily_rainfall[12:24]
         if value is not None
     )
 
@@ -557,6 +583,7 @@ def rainfall_by_date(
         rainfall_trend = "Decreasing"
     else:
         rainfall_trend = "Stable"
+
 
     # Risk calculation
     risk, risk_score = calculate_combined_risk(
@@ -588,396 +615,1032 @@ def rainfall_by_date(
         "risk_score": risk_score,
         "unit": data["hourly_units"]["precipitation"]
     }
-
 @app.get("/rainfall/summary")
-def rainfall_summary(latitude:float,longitude:float):
-    db=SessionLocal()
+def rainfall_summary(latitude: float, longitude: float):
 
-    try:
-        rainfall_records=db.query(models.Rainfall).filter(
-            models.Rainfall.latitude.between(latitude - 0.5,latitude + 0.5),
-            models.Rainfall.longitude.between(longitude - 0.5, longitude + 0.5)
-        ).all()
+    url = "https://api.open-meteo.com/v1/forecast"
 
-        rainfall_records.sort(key=lambda record: record.timestamp)
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "precipitation,soil_moisture_0_to_1cm",
+        "past_days": 12,
+        "forecast_days": 1,
+        "timezone": "Asia/Kolkata"
+    }
 
-        if rainfall_records:
+    response = requests.get(url, params=params)
 
-            latest_rainfall=rainfall_records[-1].precipitation
-        else:
-
-            latest_rainfall=0
-
-       
-
-        soil_records = db.query(models.SoilMoisture).filter(
-            models.SoilMoisture.latitude.between(latitude -0.5, latitude +0.5),
-            models.SoilMoisture.longitude.between(longitude -0.5, longitude +0.5)
-        ).all()
-
-        if soil_records:
-            soil_records.sort(key=lambda record: record.timestamp)
-            latest_soil_moisture = soil_records[-1].moisture
-        else:
-            latest_soil_moisture= None
-
-        if rainfall_records:
-            total_rainfall = sum(record.precipitation for record in rainfall_records)
-            average_rainfall = total_rainfall / len(rainfall_records)
-            max_rainfall = max(record.precipitation for record in rainfall_records)
-
-            latest_time= max(record.timestamp for record in rainfall_records)
-
-            six_hours_ago= latest_time - timedelta(hours=6)
-
-            last_6_hours = [
-                record for record in rainfall_records
-                if record.timestamp >= six_hours_ago
-            ]
-
-            last_6_hours_rainfall = sum(
-                record.precipitation for record in last_6_hours
-            )
-            twelve_hours_ago= latest_time - timedelta(hours=12)
-
-            last_12_hours =[
-                record for record in rainfall_records
-                if record.timestamp >= twelve_hours_ago
-            ]
-
-            last_12_hours_rainfall =sum(
-                record.precipitation for record in last_12_hours
-            )
-
-            previous_6_hours = [
-                record for record in rainfall_records
-                if twelve_hours_ago <= record.timestamp < six_hours_ago
-            ]
-            previous_6_hours_rainfall = sum(
-                record.precipitation for record in previous_6_hours
-            )
-
-            last_3_days_rainfall=sum(
-                record.precipitation
-                for record in rainfall_records
-                if latest_time - record.timestamp <= timedelta(days=3)
-            )
-            last_5_days_rainfall=sum(
-                record.precipitation 
-                for record in rainfall_records
-                if latest_time- record.timestamp <= timedelta(days=5)
-
-            )
-
-            last_12_days_rainfall=sum(
-
-                record.precipitation
-                for record in rainfall_records
-                if latest_time-record.timestamp  <= timedelta(days=12)
-            )
-
-        
-
-        else:
-            total_rainfall = 0
-            average_rainfall=0
-            max_rainfall=0
-            latest_time=None
-            last_6_hours_rainfall=0
-
-            previous_6_hours_rainfall = 0
-
-            last_3_days_rainfall=0
-            last_5_days_rainfall=0
-            last_12_days_rainfall=0
-
-
-
-
-        if last_6_hours_rainfall > previous_6_hours_rainfall:
-            rainfall_trend = "Increasing"
-
-        elif last_6_hours_rainfall < previous_6_hours_rainfall:
-            rainfall_trend = "Decreasing"
-
-        else:
-            rainfall_trend= "Stable"
-
-        current_risk,current_risk_score= calculate_combined_risk(
-            
-            latest_rainfall,
-            latest_soil_moisture or 0 ,
-            last_6_hours_rainfall,
-            last_12_hours_rainfall,
-            last_3_days_rainfall,
-            last_5_days_rainfall,
-            last_12_days_rainfall,
-            rainfall_trend
-        )
-        alert_mesage=generate_alert(
-            current_risk,
-            current_risk_score
-        )
-
-        if current_risk=="High":
-            risk_message="High landslide risk. Immediate attention required."
-        elif current_risk=="Moderate":
-            risk_message="Moderate landslide risk. Continue monitoring."
-        else:
-            risk_message="Low landslide risk. Conditions are currently stable."
-
-        return{
-            "total_records":len(rainfall_records),
-            "total_rainfall":total_rainfall,
-            "average_rainfall":average_rainfall,
-            "max_rainfall":max_rainfall,
-            "last_6_hours_rainfall":last_6_hours_rainfall,
-            "last_12_hours_rainfall":last_12_hours_rainfall,
-            "last_3_days_rainfall":last_3_days_rainfall,
-            "last_5_days_rainfall":last_5_days_rainfall,
-            "last_12_days_rainfall":last_12_days_rainfall,
-            "rainfall_trend":rainfall_trend,
-            "latest_soil_moisture":latest_soil_moisture,
-            "current_risk":current_risk,
-            "current_risk_score":current_risk_score,
-            "risk_message":risk_message,
-            "alert_message":alert_mesage
+    if not response.ok:
+        return {
+            "error": "Weather data could not be fetched"
         }
-    finally:
-        db.close()
+
+    data = response.json()
+
+
+    rainfall_values = data["hourly"]["precipitation"]
+
+    soil_moisture_values = data["hourly"]["soil_moisture_0_to_1cm"]
+
+    time_values = data["hourly"]["time"]
+
+
+    # Current hour
+    current_time = datetime.now().strftime("%Y-%m-%dT%H:00")
+
+    # Find current hour index
+    current_index = time_values.index(current_time)
+
+
+    latest_rainfall = rainfall_values[current_index]
+
+    latest_soil_moisture = soil_moisture_values[current_index]
+
+    if latest_rainfall is None:
+        latest_rainfall = 0
+
+    if latest_soil_moisture is None:
+        latest_soil_moisture = 0
+
+
+    # ================= 6 HOURS =================
+
+    start_6 = max(0, current_index - 5)
+
+    last_6_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_6:current_index + 1]
+    )
+
+
+    # ================= PREVIOUS 6 HOURS =================
+
+    previous_start = max(0, current_index - 11)
+
+    previous_end = max(0, current_index - 5)
+
+    previous_6_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[previous_start:previous_end]
+    )
+
+
+    # ================= 12 HOURS =================
+
+    start_12 = max(0, current_index - 11)
+
+    last_12_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_12:current_index + 1]
+    )
+
+
+    # ================= 3 DAYS =================
+
+    start_3_days = max(0, current_index - 71)
+
+    last_3_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_3_days:current_index + 1]
+    )
+
+
+    # ================= 5 DAYS =================
+
+    start_5_days = max(0, current_index - 119)
+
+    last_5_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_5_days:current_index + 1]
+    )
+
+
+    # ================= 12 DAYS =================
+
+    start_12_days = max(0, current_index - 287)
+
+    last_12_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_12_days:current_index + 1]
+    )
+
+
+    # ================= RAINFALL TREND =================
+
+    if last_6_hours_rainfall > previous_6_hours_rainfall:
+
+        rainfall_trend = "Increasing"
+
+    elif last_6_hours_rainfall < previous_6_hours_rainfall:
+
+        rainfall_trend = "Decreasing"
+
+    else:
+
+        rainfall_trend = "Stable"
+
+
+    # ================= TOTAL / AVERAGE / MAX =================
+
+    rainfall_period = [
+        value or 0
+        for value in rainfall_values[start_12_days:current_index + 1]
+    ]
+
+    total_rainfall = sum(rainfall_period)
+
+    max_rainfall = max(rainfall_period)
+
+    average_rainfall = (
+        total_rainfall / len(rainfall_period)
+        if rainfall_period
+        else 0
+    )
+
+
+    # ================= RISK =================
+
+    current_risk, current_risk_score = calculate_combined_risk(
+
+        latest_rainfall,
+
+        latest_soil_moisture,
+
+        last_6_hours_rainfall,
+
+        last_12_hours_rainfall,
+
+        last_3_days_rainfall,
+
+        last_5_days_rainfall,
+
+        last_12_days_rainfall,
+
+        rainfall_trend
+
+    )
+
+
+    # ================= ALERT =================
+
+    alert_message = generate_alert(
+        current_risk,
+        current_risk_score
+    )
+
+
+    if current_risk == "High":
+
+        risk_message = (
+            "High landslide risk. "
+            "Immediate attention required."
+        )
+
+    elif current_risk == "Moderate":
+
+        risk_message = (
+            "Moderate landslide risk. "
+            "Continue monitoring."
+        )
+
+    else:
+
+        risk_message = (
+            "Low landslide risk. "
+            "Conditions are currently stable."
+        )
+
+
+    # ================= RESPONSE =================
+
+    return {
+
+        "location": {
+            "latitude": latitude,
+            "longitude": longitude
+        },
+
+        "latest_rainfall": latest_rainfall,
+
+        "total_records": len(rainfall_period),
+
+        "total_rainfall": total_rainfall,
+
+        "average_rainfall": average_rainfall,
+
+        "max_rainfall": max_rainfall,
+
+        "last_6_hours_rainfall": last_6_hours_rainfall,
+
+        "last_12_hours_rainfall": last_12_hours_rainfall,
+
+        "last_3_days_rainfall": last_3_days_rainfall,
+
+        "last_5_days_rainfall": last_5_days_rainfall,
+
+        "last_12_days_rainfall": last_12_days_rainfall,
+
+        "rainfall_trend": rainfall_trend,
+
+        "latest_soil_moisture": latest_soil_moisture,
+
+        "current_risk": current_risk,
+
+        "current_risk_score": current_risk_score,
+
+        "risk_message": risk_message,
+
+        "alert_message": alert_message
+
+    }
+@app.get("/rainfall/chart")
+def rainfall_chart(latitude: float, longitude: float):
+
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "precipitation",
+        "past_days": 2,
+        "forecast_days": 1,
+        "timezone": "Asia/Kolkata"
+    }
+
+    response = requests.get(url, params=params)
+
+    if response.status_code != 200:
+        return {
+            "error": "Unable to fetch rainfall data"
+        }
+
+    data = response.json()
+
+    times = data["hourly"]["time"]
+    rainfall = data["hourly"]["precipitation"]
+
+    # Last 24 hours only
+    times = times[-24:]
+    rainfall = rainfall[-24:]
+
+    return {
+        "location": {
+            "latitude": latitude,
+            "longitude": longitude
+        },
+        "time": times,
+        "rainfall": rainfall
+    }
 
 @app.get("/alerts")
-def get_alerts(latitude:float,longitude:float):
-    db=SessionLocal()
+def get_alerts(latitude: float, longitude: float):
+
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "precipitation,soil_moisture_0_to_1cm",
+        "past_days": 12,
+        "forecast_days": 1,
+        "timezone": "Asia/Kolkata"
+    }
+
+    response = requests.get(url, params=params)
+
+    if not response.ok:
+        return {
+            "alert": "Weather data could not be fetched.",
+            "risk": "Unknown"
+        }
+
+    data = response.json()
+
+    rainfall_values = data["hourly"]["precipitation"]
+    soil_moisture_values = data["hourly"]["soil_moisture_0_to_1cm"]
+    time_values = data["hourly"]["time"]
+
+    # ================= CURRENT HOUR =================
+
+    current_time = datetime.now().strftime("%Y-%m-%dT%H:00")
 
     try:
-        rainfall_records = db.query(models.Rainfall).filter(
-            models.Rainfall.latitude.between(latitude - 0.5, latitude +0.5),
-            models.Rainfall.longitude.between(longitude -0.5 , longitude +0.5)
+        current_index = time_values.index(current_time)
+    except ValueError:
+        return {
+            "alert": "Current weather data is not available.",
+            "risk": "Unknown"
+        }
 
-        ).all()
+    latest_rainfall = rainfall_values[current_index] or 0
+    latest_soil_moisture = soil_moisture_values[current_index] or 0
 
-        soil_records = db.query(models.SoilMoisture).filter(
-            models.SoilMoisture.latitude.between(latitude -0.5, latitude + 0.5),
-            models.SoilMoisture.longitude.between(longitude - 0.5 , longitude +0.5)
+    # ================= 6 HOURS =================
 
-        ).all()
+    start_6 = max(0, current_index - 5)
 
-        if not rainfall_records:
-            return{
-                "alert": "No weather data available.",
-                "risk":"Unknown"
+    last_6_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_6:current_index + 1]
+    )
+
+    # ================= PREVIOUS 6 HOURS =================
+
+    previous_start = max(0, current_index - 11)
+    previous_end = max(0, current_index - 5)
+
+    previous_6_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[previous_start:previous_end]
+    )
+
+    # ================= 12 HOURS =================
+
+    start_12 = max(0, current_index - 11)
+
+    last_12_hours_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_12:current_index + 1]
+    )
+
+    # ================= 3 DAYS =================
+
+    start_3_days = max(0, current_index - 71)
+
+    last_3_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_3_days:current_index + 1]
+    )
+
+    # ================= 5 DAYS =================
+
+    start_5_days = max(0, current_index - 119)
+
+    last_5_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_5_days:current_index + 1]
+    )
+
+    # ================= 12 DAYS =================
+
+    start_12_days = max(0, current_index - 287)
+
+    last_12_days_rainfall = sum(
+        value or 0
+        for value in rainfall_values[start_12_days:current_index + 1]
+    )
+
+    # ================= RAINFALL TREND =================
+
+    if last_6_hours_rainfall > previous_6_hours_rainfall:
+        rainfall_trend = "Increasing"
+
+    elif last_6_hours_rainfall < previous_6_hours_rainfall:
+        rainfall_trend = "Decreasing"
+
+    else:
+        rainfall_trend = "Stable"
+
+    # ================= RISK =================
+
+    risk, risk_score = calculate_combined_risk(
+        rainfall=latest_rainfall,
+        soil_moisture=latest_soil_moisture,
+        last_6_hours_rainfall=last_6_hours_rainfall,
+        last_12_hours_rainfall=last_12_hours_rainfall,
+        last_3_days_rainfall=last_3_days_rainfall,
+        last_5_days_rainfall=last_5_days_rainfall,
+        last_12_days_rainfall=last_12_days_rainfall,
+        rainfall_trend=rainfall_trend
+    )
+
+    # ================= ALERT =================
+
+    alert = generate_alert(
+        risk,
+        risk_score
+    )
+
+    return {
+        "location": {
+            "latitude": latitude,
+            "longitude": longitude
+        },
+
+        "latest_rainfall": latest_rainfall,
+
+        "latest_soil_moisture": latest_soil_moisture,
+
+        "last_6_hours_rainfall": last_6_hours_rainfall,
+
+        "last_12_hours_rainfall": last_12_hours_rainfall,
+
+        "rainfall_trend": rainfall_trend,
+
+        "risk": risk,
+
+        "risk_score": risk_score,
+
+        "alert": alert
+    }
+
+@app.get("/risk-grid")
+def risk_grid():
+
+    # NER ke 8 representative monitoring points
+    grid_points = [
+        {
+            "state": "Arunachal Pradesh",
+            "latitude": 27.5860,
+            "longitude": 91.8590
+        },
+        {
+            "state": "Assam",
+            "latitude": 26.7509,
+            "longitude": 94.2037
+        },
+        {
+            "state": "Manipur",
+            "latitude": 24.8170,
+            "longitude": 93.9368
+        },
+        {
+            "state": "Meghalaya",
+            "latitude": 25.2840,
+            "longitude": 91.7210
+        },
+        {
+            "state": "Mizoram",
+            "latitude": 23.7271,
+            "longitude": 92.7176
+        },
+        {
+            "state": "Nagaland",
+            "latitude": 25.6751,
+            "longitude": 94.1086
+        },
+        {
+            "state": "Sikkim",
+            "latitude": 27.3389,
+            "longitude": 88.6065
+        },
+        {
+            "state": "Tripura",
+            "latitude": 23.8315,
+            "longitude": 91.2868
+        }
+    ]
+
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    # 8 coordinates ek hi request mein
+    latitudes = ",".join(
+        str(point["latitude"])
+        for point in grid_points
+    )
+
+    longitudes = ",".join(
+        str(point["longitude"])
+        for point in grid_points
+    )
+
+    params = {
+        "latitude": latitudes,
+        "longitude": longitudes,
+        "hourly": "precipitation,soil_moisture_0_to_1cm",
+        "past_days": 1,
+        "forecast_days": 1,
+        "timezone": "Asia/Kolkata"
+    }
+
+    try:
+
+        response = requests.get(
+            url,
+            params=params,
+            timeout=20
+        )
+
+        if response.status_code != 200:
+            return {
+                "error": "Unable to fetch Open-Meteo data",
+                "status_code": response.status_code,
+                "details": response.text
             }
 
-        rainfall_records.sort(key=lambda record: record.timestamp)
-        latest_rainfall = rainfall_records[-1].precipitation
+        data = response.json()
 
-        if soil_records:
-            soil_records.sort(key=lambda record: record.timestamp)
-            latest_soil_moisture = soil_records[-1].moisture
+        # Multiple locations ka response list hota hai
+        if isinstance(data, dict):
+            data = [data]
+
+    except requests.RequestException as e:
+
+        return {
+            "error": "Open-Meteo connection failed",
+            "details": str(e)
+        }
+
+    results = []
+
+    for index, location_data in enumerate(data):
+
+        point = grid_points[index]
+
+        rainfall_values = location_data["hourly"]["precipitation"]
+        soil_values = location_data["hourly"]["soil_moisture_0_to_1cm"]
+
+        latest_rainfall = rainfall_values[-1]
+        latest_soil = soil_values[-1]
+
+        last_6_hours = sum(rainfall_values[-6:])
+        last_12_hours = sum(rainfall_values[-12:])
+
+        # Abhi 1 day hi available hai
+        last_3_days = 0
+        last_5_days = 0
+        last_12_days = 0
+
+        # Rainfall trend
+        first_6 = sum(rainfall_values[-12:-6])
+        second_6 = sum(rainfall_values[-6:])
+
+        if second_6 > first_6 * 1.2:
+            trend = "Increasing"
+
+        elif second_6 < first_6 * 0.8:
+            trend = "Decreasing"
+
         else:
-            latest_soil_moisture=0
-        now = rainfall_records[-1].timestamp
+            trend = "Stable"
+
+        # Risk calculate
+        risk, score = calculate_combined_risk(
+            latest_rainfall,
+            latest_soil,
+            last_6_hours,
+            last_12_hours,
+            last_3_days,
+            last_5_days,
+            last_12_days,
+            trend
+        )
+
+        results.append({
+            "state": point["state"],
+            "latitude": point["latitude"],
+            "longitude": point["longitude"],
+            "rainfall": latest_rainfall,
+            "soil_moisture": latest_soil,
+            "rainfall_trend": trend,
+            "risk": risk,
+            "score": score
+        })
+
+    return {
+        "region": "North Eastern Region",
+        "total_points": len(results),
+        "grid": results
+    }
+
+@app.get("/high-risk-zones")
+def high_risk_zones():
+
+    locations = [
+        {
+            "name": "Tawang",
+            "state": "Arunachal Pradesh",
+            "latitude": 27.5860,
+            "longitude": 91.8590
+        },
+        {
+            "name": "Cherrapunji",
+            "state": "Meghalaya",
+            "latitude": 25.2840,
+            "longitude": 91.7210
+        },
+        {
+            "name": "Kohima",
+            "state": "Nagaland",
+            "latitude": 25.6751,
+            "longitude": 94.1086
+        },
+        {
+            "name": "Imphal",
+            "state": "Manipur",
+            "latitude": 24.8170,
+            "longitude": 93.9368
+        },
+        {
+            "name": "Aizawl",
+            "state": "Mizoram",
+            "latitude": 23.7271,
+            "longitude": 92.7176
+        },
+        {
+            "name": "Gangtok",
+            "state": "Sikkim",
+            "latitude": 27.3389,
+            "longitude": 88.6065
+        },
+        {
+            "name": "Agartala",
+            "state": "Tripura",
+            "latitude": 23.8315,
+            "longitude": 91.2868
+        },
+        {
+            "name": "Jorhat",
+            "state": "Assam",
+            "latitude": 26.7509,
+            "longitude": 94.2037
+        }
+    ]
+
+    results = []
+
+    for location in locations:
+
+        try:
+
+            url = "https://api.open-meteo.com/v1/forecast"
+
+            params = {
+                "latitude": location["latitude"],
+                "longitude": location["longitude"],
+                "hourly": "precipitation,soil_moisture_0_to_1cm",
+                "past_days": 1,
+                "forecast_days": 1,
+                "timezone": "Asia/Kolkata"
+            }
+
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+
+            weather_data = response.json()
+
+            rainfall = weather_data["hourly"]["precipitation"][-1] or 0
+            soil_moisture = (
+                weather_data["hourly"]["soil_moisture_0_to_1cm"][-1] or 0
+            )
+
+            risk, score = calculate_combined_risk(
+                rainfall=rainfall,
+                soil_moisture=soil_moisture,
+                last_6_hours_rainfall=0,
+                last_12_hours_rainfall=0,
+                last_3_days_rainfall=0,
+                last_5_days_rainfall=0,
+                last_12_days_rainfall=0,
+                rainfall_trend="Stable"
+            )
+
+            results.append({
+                "name": location["name"],
+                "state": location["state"],
+                "latitude": location["latitude"],
+                "longitude": location["longitude"],
+                "rainfall": rainfall,
+                "soil_moisture": soil_moisture,
+                "risk_level": risk,
+                "risk_score": score
+            })
+
+        except Exception as e:
+
+            results.append({
+                "name": location["name"],
+                "state": location["state"],
+                "latitude": location["latitude"],
+                "longitude": location["longitude"],
+                "rainfall": None,
+                "soil_moisture": None,
+                "risk_level": "Unknown",
+                "risk_score": 0
+            })
+
+    results.sort(
+        key=lambda x: x["risk_score"],
+        reverse=True
+    )
+
+    return {
+        "total_zones": len(results),
+        "zones": results
+    }
+
+
+@app.get("/rainfall/forecast-risk")
+def forecast_risk(latitude: float, longitude: float):
+
+    url = "https://api.open-meteo.com/v1/forecast"
+
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "hourly": "precipitation,soil_moisture_0_to_1cm",
+        "forecast_days": 12,
+        "timezone": "Asia/Kolkata"
+    }
+
+    response = requests.get(url, params=params)
+
+    if not response.ok:
+        return {
+            "error": "Forecast data could not be fetched"
+        }
+
+    data = response.json()
+
+    rainfall_values = data["hourly"]["precipitation"]
+    soil_moisture_values = data["hourly"]["soil_moisture_0_to_1cm"]
+    time_values = data["hourly"]["time"]
+
+    forecast_risk = []
+    forecast_scores = []
+
+    for current_index, (time, rainfall, soil_moisture) in enumerate(
+        zip(
+            time_values,
+            rainfall_values,
+            soil_moisture_values
+        )
+    ):
+
+        rainfall = rainfall or 0
+        soil_moisture = soil_moisture or 0
+
+        # ================= 6 HOURS =================
+
+        start_6 = max(0, current_index - 5)
 
         last_6_hours_rainfall = sum(
-            record.precipitation
-            for record in rainfall_records
-            if now - record.timestamp <= timedelta(hours=6)
-
+            value or 0
+            for value in rainfall_values[
+                start_6:current_index + 1
+            ]
         )
+
+        # ================= PREVIOUS 6 HOURS =================
+
+        previous_start = max(0, current_index - 11)
+        previous_end = max(0, current_index - 5)
+
         previous_6_hours_rainfall = sum(
-            record.precipitation
-            for record in rainfall_records
-            if timedelta(hours=6) < now-record.timestamp  <= timedelta(hours=12)
+            value or 0
+            for value in rainfall_values[
+                previous_start:previous_end
+            ]
         )
-        last_12_hours_rainfall = sum(
-            record.precipitation 
-            for record in rainfall_records
-            if now - record.timestamp <= timedelta(hours=12)
 
+        # ================= 12 HOURS =================
+
+        start_12 = max(0, current_index - 11)
+
+        last_12_hours_rainfall = sum(
+            value or 0
+            for value in rainfall_values[
+                start_12:current_index + 1
+            ]
         )
+
+        # ================= 3 DAYS =================
+
+        start_3_days = max(0, current_index - 71)
+
         last_3_days_rainfall = sum(
-            record.precipitation
-            for record in rainfall_records
-            if now - record.timestamp <= timedelta(days=3)
+            value or 0
+            for value in rainfall_values[
+                start_3_days:current_index + 1
+            ]
         )
-        last_5_days_rainfall= sum(
-            record.precipitation 
-            for record in rainfall_records
-            if now - record.timestamp <= timedelta(days=5)
+
+        # ================= 5 DAYS =================
+
+        start_5_days = max(0, current_index - 119)
+
+        last_5_days_rainfall = sum(
+            value or 0
+            for value in rainfall_values[
+                start_5_days:current_index + 1
+            ]
         )
+
+        # ================= 12 DAYS =================
+
+        start_12_days = max(0, current_index - 287)
+
         last_12_days_rainfall = sum(
-            record.precipitation 
-            for record in rainfall_records
-            if now - record.timestamp <= timedelta(days=12)
-        ) 
+            value or 0
+            for value in rainfall_values[
+                start_12_days:current_index + 1
+            ]
+        )
+
+        # ================= RAINFALL TREND =================
 
         if last_6_hours_rainfall > previous_6_hours_rainfall:
             rainfall_trend = "Increasing"
+
         elif last_6_hours_rainfall < previous_6_hours_rainfall:
             rainfall_trend = "Decreasing"
+
         else:
             rainfall_trend = "Stable"
 
-        risk, risk_score = calculate_combined_risk(
-            latest_rainfall,
-            latest_soil_moisture or 0,
-            last_6_hours_rainfall,
-            last_12_hours_rainfall,
-            last_3_days_rainfall,
-            last_5_days_rainfall,
-            last_12_days_rainfall,
-            rainfall_trend
-        )
+        # ================= RISK =================
 
-        alert = generate_alert(risk,risk_score)
-
-        return {
-            "location":{
-                "latitude":latitude,
-                "longitude":longitude
-            },
-            "latest_rainfall":latest_rainfall,
-            "latest_soil_moisture":latest_soil_moisture,
-            "last_6_hours_rainfall":last_6_hours_rainfall,
-            "rainfall_trend":rainfall_trend,
-            
-            "risk":risk,
-
-            "risk_score":risk_score,
-            
-            
-            "alert":alert
-        }
-
-    finally:
-        db.close()
-
-@app.get("/rainfall/forecast-risk")
-def forecast_risk(latitude:float,longitude:float):
-
-    url="http://api.open-meteo.com/v1/forecast"
-
-    params={
-        "latitude":latitude,
-        "longitude":longitude,
-        "hourly":"precipitation,soil_moisture_0_to_1cm",
-        "forecast_days":12,
-        "timezone":"Asia/Kolkata"
-    }
-
-    response = requests.get(url,params=params)
-    data=response.json()
-
-    rainfall_values = data["hourly"]["precipitation"]
-    soil_moisture_values=data["hourly"]["soil_moisture_0_to_1cm"]
-    time_values = data["hourly"]["time"]
-
-    forecast_risk=[]
-    forecast_scores=[]
-
-    for current_index,(time,rainfall,soil_moisture) in enumerate(zip(
-        time_values,
-        rainfall_values,
-        soil_moisture_values
-    
-    )):
-        # last 6 hours 
-        start_index=max(0,current_index -5)
-
-        last_6_hours_rainfall = sum(
-            rainfall_values[start_index:current_index +1]
-
-        )
-
-        #previous 6 hours 
-        previous_start = max(0,current_index - 11)
-        previous_end = max(0, current_index -5)
-
-        previous_6_hours_rainfall = sum(
-            rainfall_values[previous_start:previous_end]
-        )
-
-        # last 12 hours
-        last_12_hours_rainfall = sum(
-            rainfall_values[
-                max(0,current_index-11):current_index +1
-            ]
-        )
-
-        # last 3 days rainfall
-        last_3_days_rainfall =sum(
-            rainfall_values[
-                max(0,current_index-71):current_index + 1
-            ]
-        )
-
-        # last 5 days rainfall
-        last_5_days_rainfall=sum(
-            rainfall_values[
-                max(0,current_index-119):current_index +1
-            ]
-        )
-
-        # last 12 days rainfall
-        last_12_days_rainfall = sum(
-            rainfall_values[
-                max(0,current_index -287):current_index + 1
-            ]
-        )
-
-        #Rainfall trend
-
-        if last_6_hours_rainfall > previous_6_hours_rainfall:
-            rainfall_trend = "Increasing"
-        elif last_6_hours_rainfall < previous_6_hours_rainfall:
-            rainfall_trend = "Decreasing"
-        else:
-            rainfall_trend ="Stable"
-
-        soil_moisture = soil_moisture if soil_moisture is not None else 0 
-
-
-        #combined risk
-        risk,score=calculate_combined_risk(
-                rainfall,
-                soil_moisture,
-                last_6_hours_rainfall,
-                last_12_hours_rainfall,
-                last_3_days_rainfall,
-                last_5_days_rainfall,
-                last_12_days_rainfall,
-                rainfall_trend
+        risk, score = calculate_combined_risk(
+            rainfall=rainfall,
+            soil_moisture=soil_moisture,
+            last_6_hours_rainfall=last_6_hours_rainfall,
+            last_12_hours_rainfall=last_12_hours_rainfall,
+            last_3_days_rainfall=last_3_days_rainfall,
+            last_5_days_rainfall=last_5_days_rainfall,
+            last_12_days_rainfall=last_12_days_rainfall,
+            rainfall_trend=rainfall_trend
         )
 
         forecast_risk.append(risk)
         forecast_scores.append(score)
 
-    highest_score=max(forecast_scores)
-    highest_index=forecast_scores.index(highest_score)
-    highest_risk=forecast_risk[highest_index]
-    highest_risk_time=time_values[highest_index]
+    # ================= HIGHEST RISK =================
 
+    highest_score = max(forecast_scores)
 
-    return{
+    highest_index = forecast_scores.index(
+        highest_score
+    )
 
-        "location":{
+    highest_risk = forecast_risk[highest_index]
 
-            "latitude":data["latitude"],
-            "longitude":data["longitude"]
+    highest_risk_time = time_values[highest_index]
 
+    # ================= RESPONSE =================
+
+    return {
+        "location": {
+            "latitude": data["latitude"],
+            "longitude": data["longitude"]
         },
 
-        "forecast":{
-            "time":time_values,
-            "rainfall":rainfall_values,
-            "soil_moisture":soil_moisture_values,
+        "timezone": data["timezone"],
 
-            "risk_level":forecast_risk,
-            "risk_scores":forecast_scores,
+        "forecast": {
+            "time": time_values,
+            "rainfall": rainfall_values,
+            "soil_moisture": soil_moisture_values,
+            "risk_level": forecast_risk,
+            "risk_scores": forecast_scores
+        },
 
-            "highest_risk":highest_risk,
-            "highest_risk_scores":highest_score,
-            "highest_risk_time":highest_risk_time
+        "highest_risk": {
+            "risk_level": highest_risk,
+            "risk_score": highest_score,
+            "time": highest_risk_time
         }
     }
+@app.post("/incident-reports")
+def create_incident_report(
+    name: str = Form(...),
+    role: str = Form(...),
+    state: str = Form(...),
+    problem_type: str = Form(...),
+    location: str = Form(...),
+    description: str = Form(...),
+    rating: str = Form(None),
+    feedback: str = Form(None),
+    files: list[UploadFile] | None = File(None)
+):
+    db = SessionLocal()
+
+    saved_files = []
+
+    try:
+        # Save uploaded files
+        if files:
+            for file in files:
+
+                if not file.filename:
+                    continue
+
+                safe_name = os.path.basename(file.filename)
+
+                unique_name = (
+                    f"{datetime.now().strftime('%Y%m%d%H%M%S%f')}_"
+                    f"{safe_name}"
+                )
+
+                file_path = os.path.join("uploads", unique_name)
+
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+
+                saved_files.append(f"/uploads/{unique_name}")
+
+        report = models.IncidentReport(
+            name=name,
+            role=role,
+            state=state,
+            problem_type=problem_type,
+            location=location,
+            description=description,
+            photo=json.dumps(saved_files) if saved_files else None,
+            rating=rating,
+            feedback=feedback,
+            status="Open",
+            created_at=datetime.now()
+        )
+
+        db.add(report)
+        db.commit()
+        db.refresh(report)
+
+        return {
+            "message": "Incident report submitted successfully",
+            "report_id": report.id,
+            "status": report.status,
+            "files": saved_files
+        }
+
+    finally:
+        db.close()
+
+@app.get("/incident-reports")
+def get_incident_reports():
+
+    db = SessionLocal()
+
+    try:
+        reports = (
+            db.query(models.IncidentReport)
+            .order_by(models.IncidentReport.id.desc())
+            .all()
+        )
+
+        return [
+            {
+                "report_id": report.id,
+                "name": report.name,
+                "role": report.role,
+                "state": report.state,
+                "problem_type": report.problem_type,
+                "location": report.location,
+                "description": report.description,
+                "photo": report.photo,
+                "rating": report.rating,
+                "feedback": report.feedback,
+                "status": report.status,
+                "created_at": report.created_at
+            }
+            for report in reports
+        ]
+
+    finally:
+        db.close()
+
+@app.put("/incident-reports/{report_id}/status")
+def update_incident_report_status(
+    report_id: int,
+    status: str
+):
+    db = SessionLocal()
+
+    try:
+        report = (
+            db.query(models.IncidentReport)
+            .filter(models.IncidentReport.id == report_id)
+            .first()
+        )
+
+        if not report:
+            return {
+                "error": "Report not found"
+            }
+
+        allowed_statuses = [
+            "Open",
+            "Under Review",
+            "Resolved"
+        ]
+
+        if status not in allowed_statuses:
+            return {
+                "error": "Invalid status",
+                "allowed_statuses": allowed_statuses
+            }
+
+        report.status = status
+
+        db.commit()
+        db.refresh(report)
+
+        return {
+            "message": "Report status updated successfully",
+            "report_id": report.id,
+            "status": report.status
+        }
+
+    finally:
+        db.close()
