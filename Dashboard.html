@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+
+            <!-- <div class="search">
+                <select class="select">
+                    <option>All</option>
+                    <option>Risk Zones</option>
+                    <option>Alerts</option>
+                    <option>Roads</option>
+                    <option>Weather</option>
+                </select>
+                <input placeholder="Search risk zones, roads, alerts..." class="input">
+                <div class="search-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+            </div> -->
+
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+
+            <div class="all-menu-divider"></div>
+
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+
+    <div class="alert-panel-header">
+        <span>
+            <i class="fa-solid fa-bell"></i> Recent Alerts
+        </span>
+
+        <label for="alert-toggle">
+            <i class="fa-solid fa-xmark"></i>
+        </label>
+    </div>
+
+    <div id="alertsContainer">
+
+        <div class="alert-item">
+            <div class="alert-title">Loading alerts...</div>
+            <div class="alert-meta">Connecting to backend</div>
+            <span class="alert-level level-low">LOADING</span>
+        </div>
+
+    </div>
+
+</div>
+      
+    <section class="map-section">
+
+    <div class="monitoring-banner">
+        <div class="monitoring-left">
+            <span class="live-dot"></span>
+
+            <div>
+                <strong>LIVE NER MONITORING</strong>
+                <span>Rainfall • Soil Moisture • Landslide Risk</span>
+            </div>
+        </div>
+
+        <div class="monitoring-status">
+            <i class="fa-solid fa-signal"></i>
+            System Online
+        </div>
+    </div>
+
+    <div id="map" style="height: 500px; width: 100%;"></div>
+
+    <div class="selected-location">
+        <strong>Selected Location</strong>
+        <span id="selectedLocation">No location selected</span>
+    </div>
+
+</section>
+
+
+    <section class="data-section">
+        <h2>Monitoring Dashboard</h2>
+    
+
+    <div class="boxes-grid">
+
+    <!-- Current Rainfall -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-cloud-rain"></i>
+        </div>
+        <div class="box-content">
+            <h3>Current Rainfall</h3>
+            <p id="currentRainfall">Loading...</p>
+            <small id="rainfallStatus">Latest hourly rainfall</small>
+        </div>
+    </div>
+
+    <!-- Soil Moisture -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-droplet"></i>
+        </div>
+        <div class="box-content">
+            <h3>Soil Moisture</h3>
+            <p id="soilMoisture">Loading...</p>
+            <small>Volumetric soil moisture</small>
+        </div>
+    </div>
+
+
+    <!-- Landslide Risk -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="box-content">
+            <h3>Landslide Risk</h3>
+            <p id="currentRisk">Loading...</p>
+            <small id="riskStatusText">Risk status based on current conditions</small>
+        </div>
+    </div>
+
+
+    <!-- Risk Score -->
+   <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div class="box-content">
+            <h3>Risk Score</h3>
+            <p id="riskScore">Loading...</p>
+            <div class="risk-progress">
+            <div id="riskProgressBar"></div>
+            </div>
+            <small id="riskScoreInfo">0–39 Low | 40–69 Moderate | 70–100 High</small>
+        </div>
+    </div>
+
+
+    <!-- Last 6 Hours -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-cloud-rain"></i>
+        </div>
+        <div class="box-content">
+            <h3>Rainfall — Last 6 Hours</h3>
+            <p id="rainfall6h">Loading...</p>
+            <small>Accumulated rainfall in the last 6 hours</small>
+        </div>
+    </div>
+
+
+    <!-- Last 12 Hours -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-cloud-showers-heavy"></i>
+        </div>
+        <div class="box-content">
+            <h3>Rainfall — Last 12 Hours</h3>
+            <p id="rainfall12h">Loading...</p>
+            <small>Accumulated rainfall in the last 12 hours</small>
+        </div>
+    </div>
+
+
+    <!-- Last 3 Days -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-calendar-days"></i>
+        </div>
+        <div class="box-content">
+            <h3>Rainfall — Last 3 Days</h3>
+            <p id="rainfall3d">Loading...</p>
+            <small>Accumulated rainfall in the last 3 days</small>
+        </div>
+    </div>
+
+
+    <!-- Rainfall Trend -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-arrow-trend-up"></i>
+        </div>
+        <div class="box-content">
+            <h3>Rainfall Trend</h3>
+            <p id="rainfallTrend">Loading...</p>
+        </div>
+    </div>
+
+
+    <!-- 12 Day Accumulated Rainfall -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-cloud-rain"></i>
+        </div>
+        <div class="box-content">
+            <h3>12-Day Accumulated Rainfall</h3>
+            <p id="rainfall12d">Loading...</p>
+            <small>Cumulative rainfall over recent 12 days</small>
+        </div>
+    </div>
+
+
+    <!-- Risk Explanation -->
+    <div class="box">
+        <div class="box-img-placeholder">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div class="box-content">
+            <h3>Risk Assessment</h3>
+            <p id="riskMessage">Loading...</p>
+            <small>Based on rainfall, soil moisture and recent rainfall trends</small>
+        </div>
+    </div>
+
+    <div class="rainfall-chart-card full-width-chart">
+
+    <div class="chart-header">
+
+        <div>
+            <h2>Rainfall Trend — Last 24 Hours</h2>
+            <p>Hourly rainfall at the selected NER location</p>
+        </div>
+
+            <span class="chart-live">
+                LIVE DATA
+            </span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="rainfallChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+            
+    </section>
+
+    <footer class="footer">
+        <p>
+            AASHA - A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<script>
+
+const API_BASE_URL = "http://127.0.0.1:8000";
+console.log("PAGE LOADED");
+
+async function loadDashboardData() {
+
+    const latitude = selectedLatitude;
+    const longitude = selectedLongitude;
+
+    
+
+    if (latitude === null || longitude === null) {
+        console.log("Please select a location on the map first.");
+        return;
+    }
+
+    document.getElementById("selectedLocation").textContent =
+        `Latitude: ${latitude.toFixed(4)}° | Longitude: ${longitude.toFixed(4)}°`;
+
+
+    try {
+
+       
+        const response = await fetch(
+            `${API_BASE_URL}/rainfall/summary?latitude=${latitude}&longitude=${longitude}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Backend API failed");
+        }
+
+        const data = await response.json();
+
+        console.log("Dashboard summary:", data);
+
+        document.getElementById("currentRainfall").textContent =
+            `${data.latest_rainfall} mm`;
+
+            const rainfallStatus = document.getElementById("rainfallStatus");
+
+        if (data.latest_rainfall > 5) {
+            rainfallStatus.textContent = "Heavy rainfall";
+        } 
+        else if (data.latest_rainfall > 2) {
+            rainfallStatus.textContent = "Moderate rainfall";
+        } 
+        else if (data.latest_rainfall > 0) {
+            rainfallStatus.textContent = "Light rainfall";
+        } 
+        else {
+            rainfallStatus.textContent = "No rainfall detected";
+        }
+
+        document.getElementById("soilMoisture").textContent =
+            `${((data.latest_soil_moisture ?? 0) * 100).toFixed(1)}%`;
+
+        const riskElement = document.getElementById("currentRisk");
+        
+
+        riskElement.textContent = data.current_risk;
+
+        riskElement.style.fontWeight = "bold";
+        riskElement.style.fontSize = "22px";
+
+        
+
+        if (data.current_risk === "High") {
+            riskElement.style.color = "#dc2626";
+        } 
+        else if (data.current_risk === "Moderate") {
+    riskElement.style.color = "#d97706";
+} 
+        else {
+            riskElement.style.color = "#16a34a";
+        }
+        
+        const riskStatus = document.getElementById("riskStatusText");
+
+        if (data.current_risk === "High") {
+            riskStatus.textContent = "Immediate attention required";
+        } 
+        else if (data.current_risk === "Moderate") {
+        riskStatus.textContent = "Monitoring recommended";
+        } 
+        else {
+            riskStatus.textContent = "Current conditions appear stable";
+        }
+
+        document.getElementById("riskScore").textContent =
+            `${data.current_risk_score} / 100`;
+
+        const riskProgressBar = document.getElementById("riskProgressBar");
+        const riskScore = Math.min(Math.max(data.current_risk_score, 0), 100);
+
+        riskProgressBar.style.width = `${riskScore}%`;
+
+        if (data.current_risk === "High") {
+            riskProgressBar.style.backgroundColor = "#dc2626";
+        } 
+        else if (data.current_risk === "Moderate") {
+            riskProgressBar.style.backgroundColor = "#d97706";
+        } 
+        else {
+            riskProgressBar.style.backgroundColor = "#16a34a";
+        }
+
+        document.getElementById("rainfall6h").textContent =
+            `${data.last_6_hours_rainfall.toFixed(2)} mm`;
+
+        document.getElementById("rainfall12h").textContent =
+            `${data.last_12_hours_rainfall.toFixed(2)} mm`;
+
+        document.getElementById("rainfall3d").textContent =
+            `${data.last_3_days_rainfall.toFixed(2)} mm`;
+
+        document.getElementById("rainfallTrend").textContent =
+            data.rainfall_trend;
+
+        const trendElement = document.getElementById("rainfallTrend");
+
+        if (data.rainfall_trend === "Increasing") {
+            trendElement.style.color = "#d97706";
+        } 
+        else if (data.rainfall_trend === "Decreasing") {
+            trendElement.style.color = "#16a34a";
+        } 
+        else {
+            trendElement.style.color = "#2563eb";
+        }
+
+trendElement.style.fontWeight = "bold";
+
+        document.getElementById("rainfall12d").textContent =
+            `${data.total_rainfall.toFixed(2)} mm`;
+
+
+
+        document.getElementById("riskMessage").textContent =
+            `${data.risk_message} Rainfall trend: ${data.rainfall_trend}.`;
+
+    } catch (error) {
+        console.error("Error connecting to backend:", error);
+    }
+}
+
+
+async function loadAlerts() {
+
+    const latitude = selectedLatitude;
+    const longitude = selectedLongitude;
+
+    
+
+    if (latitude === null || longitude === null) {
+        console.log("Please select a location on the map first.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/alerts?latitude=${latitude}&longitude=${longitude}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Alerts API failed");
+        }
+
+        const data = await response.json();
+
+        console.log("Alerts data:", data);
+
+        const alertsContainer =
+            document.getElementById("alertsContainer");
+
+        alertsContainer.innerHTML = "";
+
+        if (data.risk === "Unknown") {
+
+            alertsContainer.innerHTML = `
+                <div class="alert-item">
+                    <div class="alert-title">No Weather Data</div>
+                    <div class="alert-meta">No weather records available</div>
+                    <span class="alert-level level-low">UNKNOWN</span>
+                </div>
+            `;
+
+            return;
+        }
+
+        let levelClass = "level-low";
+
+        if (data.risk === "High") {
+            levelClass = "level-high";
+        }
+        else if (data.risk === "Moderate") {
+            levelClass = "level-medium";
+        }
+
+        alertsContainer.innerHTML = `
+            <div class="alert-item">
+
+                <div class="alert-title">
+                    ${data.alert}
+                </div>
+
+                <div class="alert-meta">
+                    Location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}<br>
+                    Risk Score: ${data.risk_score} / 100
+                </div>
+
+                <span class="alert-level ${levelClass}">
+                    ${data.risk.toUpperCase()}
+                </span>
+
+            </div>
+        `;
+
+    } catch (error) {
+
+        console.error("Error loading alerts:", error);
+
+        document.getElementById("alertsContainer").innerHTML = `
+            <div class="alert-item">
+                <div class="alert-title">Unable to load alerts</div>
+                <div class="alert-meta">Backend connection error</div>
+                <span class="alert-level level-low">ERROR</span>
+            </div>
+        `;
+    }
+}
+
+async function loadRainfallChart() {
+
+    const latitude = selectedLatitude;
+    const longitude = selectedLongitude;
+
+    if (latitude === null || longitude === null) {
+        console.log("Select a location before loading rainfall chart.");
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/rainfall/chart?latitude=${latitude}&longitude=${longitude}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Rainfall chart API failed");
+        }
+
+        const data = await response.json();
+
+        const labels = data.time.map(time => {
+            return time.substring(11, 16);
+        });
+
+        const rainfallValues = data.rainfall;
+
+        const canvas = document.getElementById("rainfallChart");
+
+        if (window.rainfallChartInstance) {
+            window.rainfallChartInstance.destroy();
+        }
+
+        window.rainfallChartInstance = new Chart(canvas, {
+
+            type: "line",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    label: "Rainfall (mm)",
+                    data: rainfallValues,
+                    borderWidth: 3,
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 3
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+
+                scales: {
+
+                    y: {
+                        beginAtZero: true,
+
+                        title: {
+                            display: true,
+                            text: "Rainfall (mm)"
+                        }
+                    },
+
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Time"
+                        }
+                    }
+
+                }
+            }
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error loading rainfall chart:",
+            error
+        );
+
+    }
+}
+
+// ================= NER MAP =================
+
+const map = L.map('map').setView([25.5, 94.0], 7);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+
+// Selected location
+let selectedLatitude = null;
+let selectedLongitude = null;
+
+let marker = null;
+let riskDotsLayer = null;
+const NER_MONITORING_POINTS = [
+    [27.5860, 91.8590], // Tawang
+    [25.2840, 91.7210], // Cherrapunji
+    [25.6751, 94.1086], // Kohima
+    [24.8170, 93.9368], // Imphal
+    [23.7271, 92.7176], // Aizawl
+    [27.3389, 88.6065], // Gangtok
+    [23.8315, 91.2868], // Agartala
+    [26.7509, 94.2037]  // Jorhat
+];
+
+async function loadRiskDots() {
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/risk-grid`
+        );
+
+        if (!response.ok) {
+            throw new Error("Risk data could not be loaded.");
+        }
+
+        const data = await response.json();
+
+        console.log("Live NER risk data:", data);
+
+        
+        if (riskDotsLayer) {
+            map.removeLayer(riskDotsLayer);
+        }
+
+            riskDotsLayer = L.layerGroup();
+
+        data.grid.forEach(zone => {
+
+            let color = "#16a34a"; // Low
+
+            if (zone.risk === "High") {
+                color = "#dc2626";
+            }
+            else if (zone.risk === "Moderate") {
+                color = "#eab308";
+            }
+
+            // Create colored dot
+            const dot = L.circleMarker(
+                [zone.latitude, zone.longitude],
+                {
+                    radius: 9,
+                    color: "#ffffff",
+                    weight: 2,
+                    fillColor: color,
+                    fillOpacity: 0.9
+                }
+            );
+
+            // Popup
+            dot.bindPopup(`
+                <strong>${zone.state}</strong><br>
+                <b>${zone.risk} Risk</b><br>
+                Risk Score: ${zone.score} / 100<br>
+                Rainfall: ${zone.rainfall} mm<br>
+                Soil Moisture: ${(zone.soil_moisture * 100).toFixed(1)}%<br>
+                Rainfall Trend: ${zone.rainfall_trend}
+            `);
+
+            riskDotsLayer.addLayer(dot);
+
+        });
+
+        riskDotsLayer.addTo(map);
+
+        console.log("Live NER risk dots loaded successfully.");
+
+    }
+    catch (error) {
+
+        console.error(
+            "Risk dots error:",
+            error
+        );
+
+    }
+
+}
+
+
+// NER states
+const NER_STATES = [
+    "Arunachal Pradesh",
+    "Assam",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Sikkim",
+    "Tripura"
+];
+
+
+// NER boundary features
+let nerFeatures = [];
+let nerReady = false;
+
+
+// Load NER boundary
+async function loadNERBoundary() {
+
+    try {
+
+        const response = await fetch(
+            "ner/india-states-simplified.geojson"
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                "NER GeoJSON file could not be loaded"
+            );
+        }
+
+        const indiaData = await response.json();
+
+
+        // Select only NER states
+        const nerData = indiaData.features.filter(
+            feature =>
+                NER_STATES.includes(
+                    feature.properties.NAME_1
+                )
+        );
+
+
+        if (nerData.length !== 8) {
+
+            throw new Error(
+                "Expected 8 NER states, found " +
+                nerData.length
+            );
+
+        }
+
+
+        nerFeatures = nerData;
+
+
+        // Draw NER states
+        const nerLayer = L.geoJSON(
+            {
+                type: "FeatureCollection",
+                features: nerData
+            },
+            {
+                style: {
+                    weight: 2,
+                    fillOpacity: 0.15
+                }
+            }
+        ).addTo(map);
+
+
+        // Zoom closer to NER
+        map.fitBounds(
+            nerLayer.getBounds(),
+            {
+                padding: [30, 30]
+            }
+        );
+
+
+        nerReady = true;
+
+
+        console.log(
+            "NER boundary loaded successfully."
+        );
+
+        loadRiskDots();
+
+        console.log(
+            "NER states:",
+            nerData.map(
+                feature => feature.properties.NAME_1
+            )
+        );
+
+            
+
+
+    } catch (error) {
+
+        console.error(
+            "NER boundary error:",
+            error
+        );
+
+        alert(
+            "NER boundary error: " +
+            error.message
+        );
+
+    }
+
+}
+
+
+// Start loading NER
+loadNERBoundary();
+
+
+// ================= MAP CLICK =================
+
+map.on('click', function(e) {
+
+    if (!nerReady) {
+
+        alert(
+            "NER map is still loading. Please wait."
+        );
+
+        return;
+
+    }
+
+
+    const latitude = e.latlng.lat;
+    const longitude = e.latlng.lng;
+
+
+    // Create clicked point
+    const point = turf.point([
+        longitude,
+        latitude
+    ]);
+
+
+    // Check if point is inside any NER state
+    const insideNER = nerFeatures.some(
+        feature => {
+
+            try {
+
+                return turf.booleanPointInPolygon(
+                    point,
+                    feature
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "Point validation error:",
+                    error
+                );
+
+                return false;
+
+            }
+
+        }
+    );
+
+
+    // Reject outside NER
+    if (!insideNER) {
+
+        alert(
+            "Please select a location inside the North Eastern Region (NER)."
+        );
+
+        return;
+
+    }
+
+
+    // Save selected coordinates
+    selectedLatitude = latitude;
+    selectedLongitude = longitude;
+
+    document.getElementById("selectedLocation").textContent =
+        `Latitude: ${latitude.toFixed(4)}° | Longitude: ${longitude.toFixed(4)}°`;
+
+    localStorage.setItem("selectedLatitude", latitude);
+    localStorage.setItem("selectedLongitude", longitude);
+
+
+    console.log(
+        "Selected NER Latitude:",
+        selectedLatitude
+    );
+
+    console.log(
+        "Selected NER Longitude:",
+        selectedLongitude
+    );
+
+
+    // Remove previous marker
+    if (marker) {
+
+        map.removeLayer(marker);
+
+    }
+
+
+    // Add new marker
+    marker = L.marker([
+        selectedLatitude,
+        selectedLongitude
+    ])
+    .addTo(map)
+    .bindPopup(
+        `Selected NER Location<br>
+         Latitude: ${selectedLatitude.toFixed(4)}<br>
+         Longitude: ${selectedLongitude.toFixed(4)}`
+    )
+    .openPopup();
+
+
+    // Load backend data
+    loadDashboardData();
+    loadAlerts();
+    loadRainfallChart();
+    loadRiskDots();
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>

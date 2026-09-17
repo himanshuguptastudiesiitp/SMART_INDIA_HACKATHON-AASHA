@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainfall</title>
+    <link rel="stylesheet" href="AASHA.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <input type="checkbox" id="alert-toggle">
+    <input type="checkbox" id="all-menu-toggle">
+    <header>
+        <div class="navbar">
+            <div class="nav-logo border">
+                <video class="logo-video" autoplay loop muted playsinline>
+                    <source src="Logo.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="address border">
+                <p class="first">Monitoring</p>
+                <div class="add-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <p class="second"><b>North East</b></p>
+                </div>
+            </div>
+            
+            <a href="AccountsAndAlerts.html" class="sign-in border" style="text-decoration:none;color:white;">
+                <p><span>Hello, Authority</span></p>
+                <p class="opt">Account & Alerts</p>
+            </a>
+            <a href="ReportsAndStatus.html" class="return border" style="text-decoration:none;color:white;">
+                <p><span>Reports &</span></p>
+                <p class="opt">Status</p>
+            </a>
+            <label for="alert-toggle" class="cart border alert-label">
+                <i class="fa-solid fa-bell"></i>
+                <p>Alerts</p>
+            </label>
+        </div>
+        <div class="panel">
+            <label for="all-menu-toggle" class="panel-all border">
+                <i class="fa-solid fa-bars"></i>
+                All
+            </label>
+            <div class="panel-ops">
+                <a href="Dashboard.html">Dashboard</a>
+                <a href="HighRiskZones.html">High Risk Zones</a>
+                <a href="RoadConnectivity.html">Road Connectivity</a>
+                <a href="RainfallData.html">Rainfall Data</a>
+                <a href="UploadReport.html">Upload Report</a>
+            </div>
+            <a href="Settings.html" class="other border" style="text-decoration:none;color:white;">
+                <i class="fa-solid fa-gear"></i>
+                <p>Settings</p>
+            </a>
+        </div>
+    </header>
+
+    <div class="all-menu-panel">
+        <div class="all-menu-header">
+            <span><i class="fa-solid fa-bars"></i> All Categories</span>
+            <label for="all-menu-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+    
+        <div class="all-menu-links">
+            <a href="Dashboard.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+            <a href="HighRiskZones.html"><i class="fa-solid fa-triangle-exclamation"></i> High Risk Zones</a>
+            <a href="RoadConnectivity.html"><i class="fa-solid fa-road"></i> Road Connectivity</a>
+            <a href="RainfallData.html"><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</a>
+            <a href="UploadReport.html"><i class="fa-solid fa-upload"></i> Upload Report</a>
+    
+            <div class="all-menu-divider"></div>
+    
+            <a href="AccountsAndAlerts.html"><i class="fa-solid fa-user"></i> Account & Alerts</a>
+            <a href="ReportsAndStatus.html"><i class="fa-solid fa-file-lines"></i> Reports & Status</a>
+            <a href="Settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+        </div>
+    </div>
+
+    <div class="alert-panel">
+        <div class="alert-panel-header">
+            <span><i class="fa-solid fa-bell"></i> Recent Alerts</span>
+            <label for="alert-toggle"><i class="fa-solid fa-xmark"></i></label>
+        </div>
+        <div class="alert-item">
+            <div class="alert-title">Heavy Rainfall Warning</div>
+            <div class="alert-meta">Arunachal Pradesh · 1 hr ago</div>
+            <span class="alert-level level-medium">MEDIUM</span>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <h1><i class="fa-solid fa-cloud-rain"></i> Rainfall Data</h1>
+        <p class="subtitle">Recent rainfall observations across North Eastern states (last 24–48 hours).</p>
+
+    <div class="content-card">
+    <h2>Rainfall & Forecast Risk</h2>
+
+    
+
+    <p id="forecastLocation" style="margin: 8px 0 15px; color: #555;">
+        Selected Location: Loading...
+    </p>
+
+    <div id="forecastWarning" class="alert-item">
+        Loading forecast...
+    </div>
+
+    <div id="forecastWarning" class="alert-item">
+        Loading forecast...
+    </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date / Time</th>
+                    <th>Rainfall (mm)</th>
+                    <th>Soil Moisture</th>
+                    <th>Risk Level</th>
+                    <th>Risk Score</th>
+                </tr>
+            </thead>
+
+            <tbody id="forecastTable">
+                <tr>
+                    <td colspan="5">Loading forecast data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+        <div class="content-card">
+            <h2>Advisory</h2>
+            <ul>
+                <li>Very heavy rainfall in Meghalaya increases landslide probability in East Khasi Hills.</li>
+                <li>Heavy rain in Arunachal Pradesh – monitor Tawang sector closely.</li>
+                <li>Data is for demonstration purposes only (frontend placeholder).</li>
+            </ul>
+        </div>
+
+        <a href="Dashboard.html" class="back-link">← Back to Dashboard</a>
+    </div>
+
+    <footer class="footer">
+        <p>AASHA- A Ray Of Hope &nbsp;|&nbsp;
+            <a href="Dashboard.html">Dashboard</a>
+            <a href="HighRiskZones.html">High Risk Zones</a>
+            <a href="RoadConnectivity.html">Road Connectivity</a>
+            <a href="RainfallData.html">Rainfall Data</a>
+            <a href="UploadReport.html">Upload Report</a>
+        </p>
+    </footer>
+
+
+<script>
+
+const API_BASE_URL = "http://127.0.0.1:8000";
+
+async function loadForecast() {
+
+    const latitude = parseFloat(
+        localStorage.getItem("selectedLatitude")
+    );
+
+    const longitude = parseFloat(
+        localStorage.getItem("selectedLongitude")
+    );
+
+    console.log("Rainfall Data Location:");
+    console.log("Latitude:", latitude);
+    console.log("Longitude:", longitude);
+
+    document.getElementById("forecastLocation").textContent =
+        `Selected Location: Latitude ${latitude.toFixed(4)}° | Longitude ${longitude.toFixed(4)}°`;
+
+    if (isNaN(latitude) || isNaN(longitude)) {
+        document.getElementById("forecastTable").innerHTML =
+            `<tr>
+                <td colspan="5">
+                    Please select a location from the Dashboard first.
+                </td>
+            </tr>`;
+
+        return;     
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}/rainfall/forecast-risk?latitude=${latitude}&longitude=${longitude}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Forecast API failed");
+        }
+
+        const data = await response.json();
+
+        const forecastTable =
+            document.getElementById("forecastTable");
+
+        const warning =
+            document.getElementById("forecastWarning");
+
+        forecastTable.innerHTML = "";
+
+        const times = data.forecast.time;
+        const rainfall = data.forecast.rainfall;
+        const soilMoisture = data.forecast.soil_moisture;
+        const riskLevels = data.forecast.risk_level;
+        const riskScores = data.forecast.risk_scores;
+
+        const highestRisk = data.highest_risk;
+
+        warning.innerHTML =
+            `Highest forecast risk: <strong>${highestRisk.risk_level}</strong>
+            (${highestRisk.risk_score}/100)
+            — ${highestRisk.time}`;
+
+        // Show every 6th hour to keep table readable
+        for (let i = 0; i < times.length; i += 6) {
+
+            let riskClass = "badge-green";
+
+            if (riskLevels[i] === "High") {
+                riskClass = "badge-red";
+            }
+            else if (riskLevels[i] === "Moderate") {
+                riskClass = "badge-orange";
+            }
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${times[i].replace("T", " ")}</td>
+                <td>${rainfall[i] ?? 0}</td>
+                <td>${soilMoisture[i] ?? 0}</td>
+                <td>
+                    <span class="status-badge ${riskClass}">
+                        ${riskLevels[i]}
+                    </span>
+                </td>
+                <td>${riskScores[i]} / 100</td>
+            `;
+
+            forecastTable.appendChild(row);
+        }
+
+    }
+    catch (error) {
+
+        console.error("Forecast error:", error);
+
+        document.getElementById("forecastTable").innerHTML =
+            `<tr>
+                <td colspan="5">
+                    Unable to load forecast data.
+                </td>
+            </tr>`;
+    }
+}
+
+loadForecast();
+
+</script>
+
+</body>
+
+
+</html>
